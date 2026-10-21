@@ -152,13 +152,11 @@ export class EquipmentRequestsService {
     const { record } = await this.resolveItem(id);
     const reqObj = toEquipmentRequest(record);
     const assignmentsService = new AssignmentsService(this.repository);
-    const inventoryService = new InventoryService(this.repository);
-
     let assignedDeviceIdentifier = input.assignedDeviceName || reqObj.category;
 
     // Duplicate Checkpoint: If assigning a device upon approval, check that device is not already actively assigned!
     if (input.status === 'Approved' && input.assignedItemId) {
-      const activeAssignments = await assignmentsService.list({ page: 1, pageSize: 1000, search: '', status: 'Active' });
+      const activeAssignments = await assignmentsService.list({ page: 1, pageSize: 100, search: '', status: 'Active' });
       const alreadyAssigned = activeAssignments.records.find(
         (a) => a.itemId.toLowerCase() === input.assignedItemId!.toLowerCase(),
       );
@@ -184,21 +182,17 @@ export class EquipmentRequestsService {
 
       // Safe to assign -> Auto-create assignment record
       const assignedDate = input.assignedDate || new Date().toISOString().slice(0, 10);
-      try {
-        await assignmentsService.create({
-          itemId: input.assignedItemId,
-          itemName: input.assignedDeviceName || `Allocated Device (${input.assignedItemId})`,
-          employeeId: reqObj.requestedBy,
-          employeeName: reqObj.requestedByName || reqObj.requestedBy,
-          assignedAt: assignedDate,
-          returnedAt: '',
-          notes: `Assigned via approved request #${id.slice(0, 8)}`,
-          status: 'Active',
-        });
-        assignedDeviceIdentifier = `${input.assignedDeviceName || 'Device'} (IMEI/ID: ${input.assignedItemId})`;
-      } catch (err) {
-        console.warn('Could not auto-create assignment record upon approval:', err);
-      }
+      await assignmentsService.create({
+        itemId: input.assignedItemId,
+        itemName: input.assignedDeviceName || `Allocated Device (${input.assignedItemId})`,
+        employeeId: reqObj.requestedBy,
+        employeeName: reqObj.requestedByName || reqObj.requestedBy,
+        assignedAt: assignedDate,
+        returnedAt: '',
+        notes: `Assigned via approved request #${id.slice(0, 8)}`,
+        status: 'Active',
+      });
+      assignedDeviceIdentifier = `${input.assignedDeviceName || 'Device'} (IMEI/ID: ${input.assignedItemId})`;
     }
 
     const patchNotes = [
@@ -268,7 +262,7 @@ export class EquipmentRequestsService {
       warehouseLocation: input.warehouseLocation,
       inventoryHolder: reqObj.requestedByName || reqObj.requestedBy,
       remarks: input.remarks,
-      status: 'Active',
+      status: 'Inactive',
       sampleReceivedDate: '',
       dateOfReceipt: '',
       employeeId: reqObj.requestedBy,
@@ -286,21 +280,17 @@ export class EquipmentRequestsService {
 
     // 3. If assignToRequester is requested, create an Assignment record as well
     if (input.assignToRequester) {
-      try {
-        const assignmentsService = new AssignmentsService(this.repository);
-        await assignmentsService.create({
-          itemId: input.imei1,
-          itemName: `${input.brand} ${input.deviceModel}`,
-          employeeId: reqObj.requestedBy,
-          employeeName: reqObj.requestedByName || reqObj.requestedBy,
-          assignedAt: input.assignedDate,
-          returnedAt: '',
-          notes: `Assigned via request fulfillment #${id.slice(0, 8)}`,
-          status: 'Active',
-        });
-      } catch (err) {
-        console.warn('Could not auto-create assignment record upon fulfillment:', err);
-      }
+      const assignmentsService = new AssignmentsService(this.repository);
+      await assignmentsService.create({
+        itemId: input.imei1,
+        itemName: `${input.brand} ${input.deviceModel}`,
+        employeeId: reqObj.requestedBy,
+        employeeName: reqObj.requestedByName || reqObj.requestedBy,
+        assignedAt: input.assignedDate,
+        returnedAt: '',
+        notes: `Assigned via request fulfillment #${id.slice(0, 8)}`,
+        status: 'Active',
+      });
     }
 
     auditService.log({

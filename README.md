@@ -211,7 +211,7 @@ Before retrieving, updating, or deactivating a device, the backend resolves `ite
 - **IMEI validation:** IMEI values are stored as text and must contain exactly 15 digits.
 - **Duplicate IMEI checks:** The backend paginates through all records and compares IMEI values.
 - **Dropdown validation:** `Brand` and `Sample/HW` are restricted to documented options.
-- **Soft deletion:** `DELETE /api/inventory/:id` sets `Status` to `Inactive` rather than removing the Bitable record.
+- **Allocation state:** `Status` is `Inactive` for available inventory and `Active` for assigned inventory. Assignment and return operations keep the inventory and assignment tables synchronized. Every `Active` inventory device must have one `Active` assignment; returned assignments remain as history and their inventory device is set back to `Inactive`.
 - **Frontend labels:** `Sample/HW` is displayed as **Sample / HW Type**, and `Warehouse/Location` as **Warehouse / Location**.
 
 > **Concurrency note:** Duplicate IMEI checks are read-before-write operations, not transactional database constraints. Concurrent requests may still create duplicates unless writes are serialized or uniqueness is enforced upstream.
@@ -272,4 +272,3 @@ Once the Lark credentials are configured and `/api/integration-status` reports `
 See [`docs/implementation-roadmap.md`](docs/implementation-roadmap.md) for the planned implementation phases.
 
 ---
-

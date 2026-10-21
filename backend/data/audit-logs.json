@@ -1,5 +1,80 @@
 [
   {
+    "actorId": "pranav.gupta@transsion.com",
+    "actorRole": "TL",
+    "action": "DEVICE_ASSIGNED",
+    "entityType": "Assignment",
+    "entityId": "04601b20-416d-40c3-bc43-c4063a1c4c58",
+    "details": {
+      "itemName": "Oraimo 30 Pro",
+      "itemId": "123412341231212",
+      "employeeName": "Rexy",
+      "employeeId": "pranav.gupta@transsion.com"
+    },
+    "status": "SUCCESS",
+    "id": "a314ad79-7274-4a52-b17e-219b0c41b0b0",
+    "timestamp": "2026-10-21T08:46:09.767Z"
+  },
+  {
+    "actorId": "rex@gmail.com",
+    "actorRole": "Employee",
+    "action": "DEVICE_RETURNED",
+    "entityType": "Assignment",
+    "entityId": "e04fd674-c994-40b8-ba00-74bb4549ca8c",
+    "details": {
+      "itemName": "30 pro",
+      "employeeName": "Rex",
+      "returnedAt": "2026-10-21"
+    },
+    "status": "SUCCESS",
+    "id": "0f2ccebd-5703-44b3-8edd-a7d24134b484",
+    "timestamp": "2026-10-21T08:38:50.822Z"
+  },
+  {
+    "actorId": "rex@gmail.com",
+    "actorRole": "TL",
+    "action": "DEVICE_ASSIGNED",
+    "entityType": "Assignment",
+    "entityId": "e04fd674-c994-40b8-ba00-74bb4549ca8c",
+    "details": {
+      "itemName": "30 pro",
+      "itemId": "123412341231212",
+      "employeeName": "Rex",
+      "employeeId": "rex@gmail.com"
+    },
+    "status": "SUCCESS",
+    "id": "4cce61d6-b8fd-4707-bed2-fcd9dca64fa9",
+    "timestamp": "2026-10-21T08:36:28.479Z"
+  },
+  {
+    "actorId": "admin@inventory.internal",
+    "actorRole": "Admin",
+    "action": "INVENTORY_CREATED",
+    "entityType": "Inventory",
+    "entityId": "7d9b7903-6541-42ae-944b-ec29b4b86f10",
+    "details": {
+      "brand": "Oraimo",
+      "deviceModel": "30 pro",
+      "imei1": "123412341231212"
+    },
+    "status": "SUCCESS",
+    "id": "be819a97-f198-407c-9edb-9d60fe5e9098",
+    "timestamp": "2026-10-21T08:32:17.785Z"
+  },
+  {
+    "actorId": "admin@inventory.internal",
+    "actorRole": "Admin",
+    "action": "INVENTORY_DEACTIVATED",
+    "entityType": "Inventory",
+    "entityId": "reczz28NZsSGsca9",
+    "details": {
+      "status": "Inactive"
+    },
+    "status": "SUCCESS",
+    "id": "7eb694f5-c4e2-4804-b4e1-fde11543bbdf",
+    "timestamp": "2026-10-21T06:39:57.241Z"
+  },
+  {
     "actorId": "admin@inventory.internal",
     "actorRole": "Admin",
     "action": "INVENTORY_DEACTIVATED",

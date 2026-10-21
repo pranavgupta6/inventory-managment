@@ -27,6 +27,14 @@ const FIELD = {
   status: 'Status',
 } as const;
 
+const INVENTORY_FIELD = {
+  itemId: 'item_id',
+  imei1: 'IMEI1',
+  imei2: 'IMEI2',
+  serialNumber: 'Serial Number',
+  status: 'Status',
+} as const;
+
 export class AssignmentsService {
   constructor(private readonly repository: IBitableRepository) {}
 
@@ -67,6 +75,10 @@ export class AssignmentsService {
   }
 
   async create(input: CreateAssignmentInput): Promise<Assignment> {
+    if (input.status !== 'Active') {
+      throw new ConflictError('New assignments must use Active status. Return an assignment through the return workflow.');
+    }
+
     // Duplicate Checkpoint: Assigned devices cannot be reassigned until marked as Returned.
     const all = await this.readAll();
     const active = all.map(toAssignment).filter((a) => a.status === 'Active');
@@ -93,10 +105,31 @@ export class AssignmentsService {
       );
     }
 
-    const record = await this.repository.createRecord(this.tableId(), {
-      ...toFields(input),
-      [FIELD.assignmentId]: randomUUID(),
+    const inventory = await this.resolveInventoryDevice(input.itemId);
+    const inventoryStatus = text(inventory.fields, INVENTORY_FIELD.status);
+    if (inventoryStatus !== 'Inactive') {
+      throw new ConflictError(
+        `Device '${input.itemId}' is not available in inventory. Only Inactive devices can be assigned.`,
+      );
+    }
+
+    await this.repository.updateRecord(this.inventoryTableId(), inventory.recordId, {
+      [INVENTORY_FIELD.status]: 'Active',
     });
+
+    let record: BitableRecord;
+    try {
+      record = await this.repository.createRecord(this.tableId(), {
+        ...toFields(input),
+        [FIELD.assignmentId]: randomUUID(),
+      });
+    } catch (error) {
+      await this.repository.updateRecord(this.inventoryTableId(), inventory.recordId, {
+        [INVENTORY_FIELD.status]: 'Inactive',
+      });
+      throw error;
+    }
+
     const created = toAssignment(record);
 
     auditService.log({
@@ -131,12 +164,39 @@ export class AssignmentsService {
 
   async update(id: string, input: UpdateAssignmentInput): Promise<Assignment> {
     const { record } = await this.resolveItem(id);
+
+    if (input.status === 'Returned' && input.status !== undefined) {
+      return this.returnAssignment(id, {
+        returnedAt: input.returnedAt || '',
+        ...(input.notes !== undefined && { notes: input.notes }),
+      });
+    }
+
+    if (input.status === 'Active' && input.status !== undefined) {
+      const existing = toAssignment(record);
+      if (existing.status === 'Returned') {
+        throw new ConflictError(
+          `Assignment '${existing.id}' is already Returned. Create a new assignment record for a reassignment.`,
+        );
+      }
+    }
+
     const updated = await this.repository.updateRecord(this.tableId(), record.recordId, toFields(input));
     return toAssignment(updated);
   }
 
+  async hasActiveAssignment(itemId: string): Promise<boolean> {
+    const target = itemId.trim().toLowerCase();
+    const records = await this.readAll();
+    return records.some((record) => {
+      const assignment = toAssignment(record);
+      return assignment.status === 'Active' && assignment.itemId.trim().toLowerCase() === target;
+    });
+  }
+
   async returnAssignment(id: string, input: ReturnAssignmentInput): Promise<Assignment> {
     const { record, item: existing } = await this.resolveItem(id);
+    const inventory = await this.resolveInventoryDevice(existing.itemId);
     const returnedAt = input.returnedAt || new Date().toISOString().slice(0, 10);
     const patch: Record<string, unknown> = {
       [FIELD.status]: 'Returned',
@@ -145,7 +205,19 @@ export class AssignmentsService {
     if (input.notes !== undefined) {
       patch[FIELD.notes] = input.notes;
     }
-    const updated = await this.repository.updateRecord(this.tableId(), record.recordId, patch);
+    await this.repository.updateRecord(this.inventoryTableId(), inventory.recordId, {
+      [INVENTORY_FIELD.status]: 'Inactive',
+    });
+
+    let updated: BitableRecord;
+    try {
+      updated = await this.repository.updateRecord(this.tableId(), record.recordId, patch);
+    } catch (error) {
+      await this.repository.updateRecord(this.inventoryTableId(), inventory.recordId, {
+        [INVENTORY_FIELD.status]: 'Active',
+      });
+      throw error;
+    }
     const returned = toAssignment(updated);
 
     auditService.log({
@@ -240,6 +312,40 @@ export class AssignmentsService {
     return env.LARK_TABLE_ASSIGNMENTS;
   }
 
+  private inventoryTableId(): string {
+    if (!env.LARK_TABLE_INVENTORY || env.LARK_TABLE_INVENTORY.length === 0) {
+      throw new LarkIntegrationError('LARK_TABLE_INVENTORY is not configured.', 'INVENTORY_TABLE_NOT_CONFIGURED');
+    }
+    return env.LARK_TABLE_INVENTORY;
+  }
+
+  private async resolveInventoryDevice(itemId: string): Promise<BitableRecord> {
+    const target = itemId.trim().toLowerCase();
+    const records: BitableRecord[] = [];
+    let pageToken: string | undefined;
+    let hasMore = true;
+
+    while (hasMore) {
+      const page = await this.repository.listRecords(this.inventoryTableId(), {
+        pageSize: 100,
+        ...(pageToken !== undefined && { pageToken }),
+      });
+      records.push(...page.records);
+      pageToken = page.pageToken;
+      hasMore = page.hasMore && pageToken !== undefined;
+    }
+
+    const record = records.find((candidate) =>
+      [INVENTORY_FIELD.itemId, INVENTORY_FIELD.imei1, INVENTORY_FIELD.imei2, INVENTORY_FIELD.serialNumber]
+        .some((field) => text(candidate.fields, field).trim().toLowerCase() === target),
+    );
+
+    if (record === undefined) {
+      throw new NotFoundError(`Inventory device '${itemId}'`);
+    }
+    return record;
+  }
+
   private async readAll(): Promise<BitableRecord[]> {
     const records: BitableRecord[] = [];
     let pageToken: string | undefined;
@@ -269,11 +375,19 @@ function toFields(input: Record<string, unknown>): Record<string, unknown> {
   const fields: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(input)) {
     const fieldName = FIELD[key as keyof typeof FIELD];
-    if (fieldName !== undefined && value !== undefined) {
-      fields[fieldName] = (key === 'assignedAt' || key === 'returnedAt') && typeof value === 'string' && value.length > 0
-        ? dateToLarkTimestamp(value)
-        : value;
+    if (fieldName === undefined || value === undefined) {
+      continue;
     }
+
+    if ((key === 'assignedAt' || key === 'returnedAt') && typeof value === 'string') {
+      if (value.length === 0) {
+        continue;
+      }
+      fields[fieldName] = dateToLarkTimestamp(value);
+      continue;
+    }
+
+    fields[fieldName] = value;
   }
   return fields;
 }

@@ -49,7 +49,7 @@ const emptyForm: InventoryInput & {
   warehouseLocation: 'Main Warehouse',
   inventoryHolder: 'IT Stock',
   remarks: '',
-  status: 'Active',
+  status: 'Inactive',
   sampleReceivedDate: new Date().toISOString().slice(0, 10),
   dateOfReceipt: new Date().toISOString().slice(0, 10),
   employeeId: '',
@@ -267,7 +267,7 @@ function InventoryForm({ item, onClose }: FormProps) {
                 onChange={(e) => set('status', e.target.value as InventoryStatus)}
               >
                 <option value="Active">Active</option>
-                <option value="Inactive">Inactive / Scrapped</option>
+                <option value="Inactive">Inactive / Available</option>
               </select>
             </Field>
 
@@ -672,8 +672,8 @@ export function InventoryPage() {
       {/* Stats Summary */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat title="Total devices" value={data?.total ?? '—'} />
-        <Stat title="Active devices" value={data?.activeCount ?? '—'} />
-        <Stat title="Inactive devices" value={data?.inactiveCount ?? '—'} />
+        <Stat title="Assigned devices" value={data?.activeCount ?? '—'} />
+        <Stat title="Available devices" value={data?.inactiveCount ?? '—'} />
         <Stat
           title="Brands represented"
           value={data ? Object.keys(data.totalByBrand).length : '—'}

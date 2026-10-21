@@ -47,7 +47,7 @@ const deviceFields = {
   warehouseLocation: z.string().trim().min(1, 'Warehouse / Location is required').max(200),
   inventoryHolder: z.string().trim().min(1, 'Inventory Holder is required').max(200),
   remarks: optionalText(2000),
-  status: z.enum(['Active', 'Inactive']).default('Active'),
+  status: z.enum(['Active', 'Inactive']).default('Inactive'),
   sampleReceivedDate: optionalText(50),
   dateOfReceipt: optionalText(50),
   employeeId: optionalText(100),
@@ -92,4 +92,3 @@ export type CreateInventoryInput = z.infer<typeof createInventorySchema>;
 export type UpdateInventoryInput = z.infer<typeof updateInventorySchema>;
 export type BulkUploadItem = z.infer<typeof bulkUploadItemSchema>;
 export type BulkUploadInput = z.infer<typeof bulkUploadSchema>;
-

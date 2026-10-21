@@ -277,7 +277,7 @@ function ApprovalModal({
     pageSize: 100,
     search: '',
     brand: '',
-    status: 'Active',
+    status: 'Inactive',
   });
   const { updateStatus } = useRequestMutations();
   const { user, role } = useUserRole();

@@ -176,7 +176,8 @@ fields automatically. Configure these business fields before setting
 | Field | Suggested Bitable type |
 |---|---|
 | `Brand` | Single select: `Itel`, `Tecno`, `Infinix`, `Oraimo`, `Villaon`, `Other` |
-| `Device Model`, `IMEI1`, `IMEI2`, `Serial Number`, `VC ID`, `Color`, `Storage / RAM`, `Warehouse/Location`, `Inventory Holder`, `Remarks`, `Status` | Text |
+| `Device Model`, `IMEI1`, `IMEI2`, `Serial Number`, `VC ID`, `Color`, `Storage / RAM`, `Warehouse/Location`, `Inventory Holder`, `Remarks` | Text |
+| `Status` | Text: `Inactive` for available inventory, `Active` for assigned inventory |
 | `Sample/HW` | Single select: `PRO`, `PRO-1`, `PR1`, `PR1-1`, `PR2`, `PIR`, `MPR` |
 | `Assigned Date` | Date |
 | `item_id` | Technical text field used for the public application identifier |
@@ -192,6 +193,20 @@ Lark Date fields are returned as Unix timestamps in milliseconds. The backend
 converts them to `YYYY-MM-DD` for the API/frontend and converts that format back
 to a millisecond timestamp when creating or updating a record. Brand, Sample/HW,
 and Status are sent as their configured single-select option text values.
+
+### Assignment synchronization
+
+The application treats assignment records as the source of allocation history and
+keeps the current allocation state mirrored in inventory:
+
+- Creating an assignment requires an `Inactive` inventory device, changes that
+  device to `Active`, and creates one `Active` assignment.
+- Returning an assignment changes it to `Returned` and changes the linked
+  inventory device back to `Inactive`.
+- Direct status changes that would leave an `Active` inventory device without an
+  active assignment, or would hide an active assignment, are rejected.
+- Returned assignment records are never reactivated; a reassignment creates a
+  new assignment record.
 
 The API resolves the public `item_id` to Lark's internal `record_id` before
 detail, update, and deactivate operations. IMEI uniqueness scans all Bitable

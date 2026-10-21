@@ -252,7 +252,7 @@ export class InventoryService {
           [FIELD.warehouseLocation]: item.warehouseLocation || 'Main Warehouse',
           [FIELD.inventoryHolder]: holder,
           [FIELD.remarks]: remarksWithDetails,
-          [FIELD.status]: item.status || 'Active',
+          [FIELD.status]: item.assignedTo || item.employeeId ? 'Inactive' : item.status || 'Inactive',
         });
 
         const createdItem = toInventoryItem(record);
@@ -311,6 +311,21 @@ export class InventoryService {
 
   async update(id: string, input: UpdateInventoryInput): Promise<InventoryItem> {
     const { record, item: existing } = await this.resolveItem(id);
+    const assignmentsService = new AssignmentsService(this.repository);
+    const hasActiveAssignment = await assignmentsService.hasActiveAssignment(existing.itemId);
+
+    if (input.status === 'Active' && existing.status !== 'Active' && !hasActiveAssignment) {
+      throw new ConflictError(
+        `Device '${existing.itemId}' cannot be marked Active without a matching active assignment.`,
+      );
+    }
+
+    if (input.status === 'Inactive' && existing.status === 'Active' && hasActiveAssignment) {
+      throw new ConflictError(
+        `Device '${existing.itemId}' has an active assignment. Return the assignment before marking the inventory device Inactive.`,
+      );
+    }
+
     await this.ensureUniqueImeiAndVc(
       input.imei1 ?? existing.imei1,
       input.imei2 ?? existing.imei2,
@@ -318,39 +333,46 @@ export class InventoryService {
       existing.itemId,
     );
     const updated = await this.repository.updateRecord(this.tableId(), record.recordId, toFields(input));
-    const item = toInventoryItem(updated);
+    const updatedItem = toInventoryItem(updated);
 
     auditService.log({
       actorId: 'admin@inventory.internal',
       actorRole: 'Admin',
       action: 'INVENTORY_UPDATED',
       entityType: 'Inventory',
-      entityId: item.itemId,
+      entityId: updatedItem.itemId,
       details: { updatedFields: Object.keys(input) },
       status: 'SUCCESS',
     });
 
-    return item;
+    return updatedItem;
   }
 
   async deactivate(id: string): Promise<InventoryItem> {
-    const { record } = await this.resolveItem(id);
+    const { record, item } = await this.resolveItem(id);
+    const assignmentsService = new AssignmentsService(this.repository);
+    if (await assignmentsService.hasActiveAssignment(item.itemId)) {
+      throw new ConflictError(
+        `Device '${item.itemId}' has an active assignment. Return the assignment before deactivating it.`,
+      );
+    }
+
     const updated = await this.repository.updateRecord(this.tableId(), record.recordId, {
       [FIELD.status]: 'Inactive',
     });
-    const item = toInventoryItem(updated);
+    const updatedItem = toInventoryItem(updated);
 
     auditService.log({
       actorId: 'admin@inventory.internal',
       actorRole: 'Admin',
       action: 'INVENTORY_DEACTIVATED',
       entityType: 'Inventory',
-      entityId: item.itemId,
+      entityId: updatedItem.itemId,
       details: { status: 'Inactive' },
       status: 'SUCCESS',
     });
 
-    return item;
+    return updatedItem;
   }
 
   /**
