@@ -1,0 +1,92 @@
+[
+  {
+    "actorId": "admin@inventory.internal",
+    "actorRole": "Admin",
+    "action": "INVENTORY_DEACTIVATED",
+    "entityType": "Inventory",
+    "entityId": "cab35598-3303-4ffb-ac56-14729e45e4e4",
+    "details": {
+      "status": "Inactive"
+    },
+    "status": "SUCCESS",
+    "id": "3b83be9e-fbd4-426d-b2a3-6861914c2b7f",
+    "timestamp": "2026-10-21T05:15:56.856Z"
+  },
+  {
+    "actorId": "admin@inventory.internal",
+    "actorRole": "Admin",
+    "action": "REQUEST_APPROVED",
+    "entityType": "Request",
+    "entityId": "d6e3851f-7efc-4277-8748-2a7c499f0924",
+    "details": {
+      "status": "Approved",
+      "remarks": "Approved by IT Admin (Admin)",
+      "assignedDevice": "Mobile"
+    },
+    "status": "SUCCESS",
+    "id": "8717f4fb-99c2-4240-9bb9-5ea2d7c65825",
+    "timestamp": "2026-10-21T04:15:37.798Z"
+  },
+  {
+    "actorId": "gpranav859@gmail.com",
+    "actorName": "Test",
+    "actorRole": "Employee",
+    "action": "REQUEST_SUBMITTED",
+    "entityType": "Request",
+    "entityId": "d6e3851f-7efc-4277-8748-2a7c499f0924",
+    "details": {
+      "category": "Mobile",
+      "purpose": "Validation",
+      "projectDepartment": "IT Operations",
+      "duration": "30 days",
+      "preferredDevice": "Itel"
+    },
+    "status": "SUCCESS",
+    "id": "cb474314-f8b4-490f-844e-feab17679240",
+    "timestamp": "2026-10-21T04:14:44.352Z"
+  },
+  {
+    "actorId": "admin@inventory.internal",
+    "actorRole": "Admin",
+    "action": "INVENTORY_CREATED",
+    "entityType": "Inventory",
+    "entityId": "cab35598-3303-4ffb-ac56-14729e45e4e4",
+    "details": {
+      "brand": "Tecno",
+      "deviceModel": "Can",
+      "imei1": "123123123123124"
+    },
+    "status": "SUCCESS",
+    "id": "4763a9f9-764b-4105-90b0-13faa0a98664",
+    "timestamp": "2026-10-21T04:12:29.463Z"
+  },
+  {
+    "actorId": "admin@inventory.internal",
+    "actorRole": "Admin",
+    "action": "DUPLICATE_BLOCKED",
+    "entityType": "Inventory",
+    "entityId": "123123123123123",
+    "details": {
+      "error": "Duplicate Checkpoint: A device with IMEI '123123123123123' already exists.",
+      "imei1": "123123123123123",
+      "imei2": "",
+      "vcId": "",
+      "brand": "Tecno",
+      "deviceModel": "Can"
+    },
+    "status": "BLOCKED",
+    "id": "492eeb93-d55d-40d2-8309-76ba4302adb2",
+    "timestamp": "2026-10-21T04:12:19.443Z"
+  },
+  {
+    "actorId": "unknown",
+    "actorRole": "Admin",
+    "action": "DELETION_BLOCKED",
+    "entityType": "Inventory",
+    "entityId": "reczz28NZsSGsbZC",
+    "details": "Attempted delete on inventory entry. Prohibited by policy.",
+    "status": "BLOCKED",
+    "id": "f62e406f-ae96-4240-a655-492fc488864e",
+    "timestamp": "2026-10-16T10:54:46.584Z"
+  }
+]
