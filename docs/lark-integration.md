@@ -84,7 +84,6 @@ Create the following tables inside the Base:
 |---|---|---|
 | Inventory | Equipment items | `LARK_TABLE_INVENTORY` |
 | Employees | Synced employee records | `LARK_TABLE_EMPLOYEES` |
-| Departments | Synced department records | `LARK_TABLE_DEPARTMENTS` |
 | Assignments | Equipment assignments | `LARK_TABLE_ASSIGNMENTS` |
 | Requests | Equipment requests | `LARK_TABLE_REQUESTS` |
 
@@ -104,7 +103,6 @@ LARK_APP_SECRET=xxxxxxxxxx      # From developer console
 LARK_BITABLE_APP_TOKEN=...      # From Bitable URL
 LARK_TABLE_INVENTORY=tbl...     # Table ID (optional at startup)
 LARK_TABLE_EMPLOYEES=tbl...
-LARK_TABLE_DEPARTMENTS=tbl...
 LARK_TABLE_ASSIGNMENTS=tbl...
 LARK_TABLE_REQUESTS=tbl...
 ```

@@ -16,7 +16,6 @@ export async function getIntegrationStatus(): Promise<IntegrationStatus> {
   const tables: Record<string, boolean> = {
     inventory: env.LARK_TABLE_INVENTORY.length > 0,
     employees: env.LARK_TABLE_EMPLOYEES.length > 0,
-    departments: env.LARK_TABLE_DEPARTMENTS.length > 0,
     assignments: env.LARK_TABLE_ASSIGNMENTS.length > 0,
     requests: env.LARK_TABLE_REQUESTS.length > 0,
   };

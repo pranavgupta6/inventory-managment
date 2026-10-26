@@ -5,7 +5,6 @@ import {
   ClipboardList,
   ArrowLeftRight,
   Users,
-  Building2,
   BarChart3,
   Settings,
   ChevronLeft,
@@ -26,7 +25,6 @@ const navItems: NavItem[] = [
   { label: 'Requests', href: '/requests', icon: ClipboardList },
   { label: 'Assignments', href: '/assignments', icon: ArrowLeftRight },
   { label: 'Employees', href: '/employees', icon: Users },
-  { label: 'Departments', href: '/departments', icon: Building2 },
   { label: 'Audit & Reports', href: '/reports', icon: BarChart3 },
   { label: 'Settings', href: '/settings', icon: Settings },
 ];

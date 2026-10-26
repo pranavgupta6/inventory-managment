@@ -79,7 +79,7 @@ export interface InventoryListResult {
 }
 
 // ---------------------------------------------------------------------------
-// Employee / Department types (Phase 2)
+// Employee types (Phase 2)
 // ---------------------------------------------------------------------------
 
 export interface Employee {
@@ -90,13 +90,6 @@ export interface Employee {
   departmentName?: string;
   role?: string;
   avatarUrl?: string;
-}
-
-export interface Department {
-  id: string;
-  name: string;
-  parentId?: string;
-  memberCount?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -252,5 +245,4 @@ export type ReportType =
   | 'exceptions';
 
 export type ReportTimeframe = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'all';
-
 

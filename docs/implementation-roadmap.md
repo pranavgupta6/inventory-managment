@@ -34,8 +34,8 @@
 **Dependencies**: Phase 1 complete. Lark credentials configured. Bitable tables created.
 
 ### Deliverables
-- [ ] Create Bitable tables: Inventory, Employees, Departments, Assignments, Requests
-- [ ] Sync Lark organizational data (departments, employees via Contacts API)
+- [ ] Create Bitable tables: Inventory, Employees, Assignments, Requests
+- [ ] Sync Lark employee data via Contacts API
 - [ ] CRUD API for inventory items (`/api/inventory`)
 - [ ] Inventory list page with server-side pagination and search
 - [ ] Inventory detail page
@@ -58,7 +58,7 @@
 ### Deliverables
 - [ ] Lark OAuth login flow (user_access_token)
 - [ ] Role-based access control middleware (`admin`, `manager`, `employee`, `viewer`)
-- [ ] Department and employee pages (synced from Lark Contacts API)
+- [ ] Employee page (synced from Lark Contacts API)
 - [ ] Manual sync trigger endpoint + UI
 - [ ] Audit history table in Bitable
 

@@ -52,7 +52,6 @@ const envSchema = z.object({
   // Optional table IDs
   LARK_TABLE_INVENTORY: z.string().default(''),
   LARK_TABLE_EMPLOYEES: z.string().default(''),
-  LARK_TABLE_DEPARTMENTS: z.string().default(''),
   LARK_TABLE_ASSIGNMENTS: z.string().default(''),
   LARK_TABLE_REQUESTS: z.string().default(''),
 

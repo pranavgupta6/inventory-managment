@@ -38,15 +38,6 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'departments',
-        element: (
-          <PlaceholderPage
-            title="Departments"
-            description="View the departmental hierarchy from your Lark organization."
-          />
-        ),
-      },
-      {
         path: 'reports',
         element: <AuditPage />,
       },
